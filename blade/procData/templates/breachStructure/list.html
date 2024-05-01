@@ -1,8 +1,8 @@
-(% extends "base.html" %)
+{% extends "base.html" %}
 
-(% block title %)Breaches(% endblock %)
+{% block title %}Breaches{% endblock %}
 
-(% block content %)
+{% block content %}
   <h1>breachStructure</h1>
   {% for breachStructure in breachStructures %}
     <div class="breachStructure">
@@ -15,4 +15,4 @@
       ...
       </div>
   {% endfor %}
-(% endblock %)
+{% endblock %}
