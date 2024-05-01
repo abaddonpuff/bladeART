@@ -1,0 +1,18 @@
+(% extends "base.html" %)
+
+(% block title %)Breaches(% endblock %)
+
+(% block content %)
+  <h1>breachStructure</h1>
+  {% for breachStructure in breachStructures %}
+    <div class="breachStructure">
+      <a href="{ % url 'breachStructure_detail' breachStructure.email %}">
+        {{ breachStructure.email}}
+      </a>
+      <br>
+      {{ breachStructure.handle }}
+      {{ breachStructure.userId }}
+      ...
+      </div>
+  {% endfor %}
+(% endblock %)
