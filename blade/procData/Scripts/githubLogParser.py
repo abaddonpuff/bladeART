@@ -1,16 +1,33 @@
-import requests
-import json
 import csv
+import datetime
+import json
 from collections import defaultdict
 from pprint import pprint
-import datetime
+import requests
+'''
+Order:
+ Input: List of repos, list of ldap names, name of the organization.
+ downloadReposfromList (Obtains all logs from org)
+ employee2github (Process github from ldap)
+ transformDict2CSV (Get a dictionary from the previous call)
+ getUserListfromCSV (Process the dict information into a CSV)
+ getOrgMembership (Process the list and determine repo membership)
+ analyzeLog(Obtain the logs from the interesting subjects and stores into another csv)
+ 
+'''
 
 def employee2github(employeeFile, ghUsername, ghToken, ldapResource):
+    '''
+    Obtains github account name from an employee list.
+
+    Input: List of employees
+    Output: Dictionary with the github account
+    '''
     employeesInfo = {}
 
     while True:
         employee = employeeFile.readline()
-        if employee != 0:
+        if employee != '':
             print(f'Trying user {employee}')
             ldapsearch = f'{ldapResource}'
             res = requests.get(ldapsearch, auth=(ghUsername, ghToken))
@@ -26,6 +43,12 @@ def employee2github(employeeFile, ghUsername, ghToken, ldapResource):
     return employeesInfo
 
 def transformDict2CSV(outputFile, employeesInfo):
+    '''
+    Uses Dictionary obtained from employee2github to return a file with github users as a CSV
+
+    Input: Dictionary of github accounts and employees
+    Output:
+    '''
     for employee in employeesInfo.keys():
         if employeesInfo[employee] != '<NONE>':
             outputFile.write(f'{employee.strip()},{employeesInfo[employee]}\n')
@@ -33,6 +56,12 @@ def transformDict2CSV(outputFile, employeesInfo):
     outputFile.close()
 
 def getUserListfromCSV(csvfile):
+    '''
+    Gets a list of users from a CSV file processed by transferDict2CSV to grab the Github accounts
+
+    Input: CSV File with ldapAccount and correlated github accounts
+    Output: List of Github accounts from the associated list
+    '''
     users=[]
     reader = csv.reader(csvfile)
     data = list(reader)
@@ -47,6 +76,12 @@ def getUserListfromCSV(csvfile):
     return users
 
 def getOrgMembership(orgFile, users, ghUsername, ghToken):
+    '''
+    Gets the organization memberships associated to a github account using a list of organizations
+
+    Input: List of organizations, list of users
+    Output: List of organization memberships to a github account
+    '''
     userInOrg = defaultdict(list)
 
     while True:
@@ -69,6 +104,14 @@ def getOrgMembership(orgFile, users, ghUsername, ghToken):
     return userInOrg
 
 def analyzeLog(dateToCheck, logFileList, outputLogFile, outputAnalysisFile, userList):
+    '''
+    Check multiple log files for any hits from a github account list associated to an ldap as processed by
+    employee2github and getUserListfromCSV/transformDict2CSV after a specific date. And check how many times somone
+    appears on said logs
+
+    Input: Date to check, List with all the log files, output filename for results, list of github accounts.
+    Output: File log with all relevant logs and status about how many logs and results were processed.
+    '''
     logsProcessed = 0
     userHits = 0
     logsAfterDate = 0
@@ -101,6 +144,12 @@ def analyzeLog(dateToCheck, logFileList, outputLogFile, outputAnalysisFile, user
         return
 
 def downloadReposfromList(repos, target, ghUsername, ghToken):
+    '''
+    From list of repo names, download all repo files from a github org.
+
+    Input: list of repos in a github org, target github org name.
+    Output: Downloaded log files from all repos in the list.
+    '''
     for repo in repos:
         filename = str(target+repo.strip()+'.zip')
         file = open(filename, 'wb')
@@ -109,5 +158,3 @@ def downloadReposfromList(repos, target, ghUsername, ghToken):
             if chunk:
                 file.write(chunk)
         file.close()
-
-
