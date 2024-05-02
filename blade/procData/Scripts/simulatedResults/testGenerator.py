@@ -36,18 +36,48 @@ def generate_name():
         }
     }
 
-def generateEmployeesFromJSON(jsonFile):
+def createEmployeeJson(employeeSize, filename):
+    '''
+    Generate a universe of test employees with the size of Employee Size and saves it to the filename path.
+    '''
+    employeeUniverse = {}
+    while len(employeeUniverse.keys()) <= employeeSize:
+        entry = generate_name()
+        if list(entry.keys())[0] in employeeUniverse.keys():
+            continue
+        else:
+            employeeUniverse.update(entry)
+
+    with open(filename, 'w') as f:
+        json.dump(employeeUniverse,f, indent=4)
+
+    return
+
+def generateEmployeesFromJSON(jsonFileName):
     '''
     Returns a list of logs from a created JSON file from generate_name
     input = generate_name dictionary as a JSON file
-    output = listpfNames
+    output = listofNames
     '''
+    jsonFile = open(jsonFileName, 'r')
     names = []
     testNames = json.load(jsonFile)
-    for item in testNames['employee']:
-        names.append(list(item.keys())[0].lower())
+    for item in testNames.keys():
+        names.append(item)
 
+    jsonFile.close()
     return(names)
+
+def employeeGithubUser(user, jsonFileName):
+    '''
+    Obtains the GithubAssociated user to an ldapName
+    '''
+    jsonFile = open(jsonFileName, 'r')
+    namePool = json.load(jsonFile)
+    githubUser = namePool[user]['github_account']
+    jsonFile.close()
+    return githubUser
+
 
 def generateRandomLogsfromEmployees(startTime, endTime, orgname):
     '''
@@ -58,8 +88,8 @@ def generateRandomLogsfromEmployees(startTime, endTime, orgname):
     '''
 
     #Define random pools
-    myTestFile = open('employee2githubSIM.json', 'r')
-    employees = generateEmployeesFromJSON(myTestFile)
+    myJSONFile = 'employeeUniverse.json'
+    employees = generateEmployeesFromJSON(myJSONFile)
     idchars = string.ascii_letters + "_-"
     actions_target = ["org","team","repo"]
     actions_action = ["add_member","remove_member","invite_member","create","log_export","commit"]
@@ -77,23 +107,35 @@ def generateRandomLogsfromEmployees(startTime, endTime, orgname):
     action = f'{random.choice(actions_target)}.{random.choice(actions_action)}'
     ldapCreation = random.randint(int(ldapcreationStart.timestamp() * 1000), int(ldapcreationEnd.timestamp() * 1000))
     hashed_token = secrets.token_urlsafe(32)+"=="
+    actor = employeeGithubUser(random.choice(testLogEmployees), myJSONFile).lower()
+    user = employeeGithubUser(random.choice(testuser), myJSONFile).lower()
 
     return{
         "@timestamp":unixTimestamp,
         "_document_id":id,
         "action":action,
-        "actor":random.choice(testLogEmployees),
+        "actor":actor,
         "actor_location":{"country_code":country_code},
         "created_at":ldapCreation,
         "operation_type":random.choice(operation_types),
         "hashed_token":hashed_token,
         "org":orgname,
-        "user":random.choice(testuser),
+        "user":user
     }
+def generate_testLog(orgName, startTime, endTime, logAmount):
+    '''
+    Generate a logFile on the simTests under the orgName folder and the specified starttime and endtime with (logAmount) numbers of logs
+    '''
+    with open(f'{orgName}_repo_github.log', 'w') as logFile:
+        linesWritten = 0
+        while linesWritten <= logAmount:
+            json.dump(generateRandomLogsfromEmployees(startTime, endTime, orgName),logFile)
+            logFile.write('\n')
+            linesWritten += 1
 
+    logFile.close()
 
 if __name__ == '__main__':
-    starttime = datetime.datetime(2023,12,12,00,00,00,00)
-    endtime = datetime.datetime(2024,4,12,23,59,59,00)
-    for i in list(range(20)):
-        print(generateRandomLogsfromEmployees(starttime, endtime, "myOrg"))
+    # starttime = datetime.datetime(2023,12,12,00,00,00,00)
+    # endtime = datetime.datetime(2024,4,12,23,59,59,00)
+    # generate_testLog("leblanc", starttime, endtime, 150)
