@@ -29,7 +29,7 @@ def upload_csv(request):
 
             reader = DictReader(csv_file.read().decode("utf-8").splitlines())
             for row in reader:
-                user, created = dbQueriedUsers.objects.get_or_create(user=row[0])
+                user, created = dbQueriedUsers.objects.get_or_create(user=row['Names'])
                 if not created:
                     print(f"Skip, user {user} already exists")
 
