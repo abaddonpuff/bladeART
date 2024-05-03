@@ -1,5 +1,7 @@
-from django.shortcuts import render, get_object_or_404
-from procData.models import breachStructure
+from django.shortcuts import render, get_object_or_404, redirect
+from procData.models import breachStructure, dbQueriedUsers
+from procData.forms import uploadCSV
+from csv import DictReader
 
 # Create your views here.
 def breachStructure_list(request):
@@ -18,3 +20,32 @@ def breachStructure_detail(request, email):
 	return render(request,
 		'breachStructure/detail.html',
 		{'breachStructures':breachStruct})
+
+#def query- username
+def upload_csv(request):
+	if request.method == "POST":
+		form = uploadCSV(request.POST, request.FILES)
+		if form.is_valid():
+			csv_file = request.FILES['csv_file']
+
+			reader = DictReader(csv_file.read().decode('utf-8').splitlines())
+			for row in reader:
+				print(row)
+				#dbQueriedUsers.objects.create(user=row[0])
+
+			return redirect('success_url')
+
+
+	else:
+		form = uploadCSV()
+
+
+	return render(request,
+		"csvUpload/csvUpload.html",
+		{"form":form}
+		)
+
+def success_url(request):
+	return render(request,
+		"csvUpload/success_url.html"
+		)
