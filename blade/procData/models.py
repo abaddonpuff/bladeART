@@ -12,3 +12,16 @@ class breachStructure(models.Model):
 
 	def __str__(self):
 		return self.email
+
+
+#class results
+
+#class query
+class dbQueriedUsers(models.Model):
+	user = models.CharField(max_length=100,unique=True)
+
+	class Meta:
+		ordering = ['-id']
+
+	def __str__(self):
+		return self.user

@@ -135,7 +135,23 @@ def generate_testLog(orgName, startTime, endTime, logAmount):
 
     logFile.close()
 
+def grabEmployeeSample(jsonFileName, employeeAmount):
+    names=[]
+    employeeCount = 0
+    jsonFile = open(jsonFileName, 'r')
+    namePool = json.load(jsonFile)
+    while employeeCount <= employeeAmount:
+        candidate = random.choice(list(namePool.keys()))
+        if candidate not in names:
+            names.append(candidate)
+            employeeCount += 1
+    jsonFile.close()
+    return names
+
 if __name__ == '__main__':
     # starttime = datetime.datetime(2023,12,12,00,00,00,00)
     # endtime = datetime.datetime(2024,4,12,23,59,59,00)
     # generate_testLog("leblanc", starttime, endtime, 150)
+    myJSONFile = 'employeeUniverse.json'
+    for employee in grabEmployeeSample(myJSONFile, 30):
+        print(employee)
