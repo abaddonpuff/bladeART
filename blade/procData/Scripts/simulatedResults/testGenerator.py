@@ -3,7 +3,6 @@ import string
 import json
 import datetime
 import secrets
-import hashlib
 
 
 def generate_name():
@@ -59,23 +58,23 @@ def generateEmployeesFromJSON(jsonFileName):
     input = generate_name dictionary as a JSON file
     output = listofNames
     '''
-    jsonFile = open(jsonFileName, 'r')
     names = []
-    testNames = json.load(jsonFile)
-    for item in testNames.keys():
-        names.append(item)
+    with open(jsonFileName, 'r') as jsonFile:
+        testNames = json.load(jsonFile)
+        for item in testNames.keys():
+            names.append(item)
 
-    jsonFile.close()
+
     return(names)
 
 def employeeGithubUser(user, jsonFileName):
     '''
     Obtains the GithubAssociated user to an ldapName
     '''
-    jsonFile = open(jsonFileName, 'r')
-    namePool = json.load(jsonFile)
-    githubUser = namePool[user]['github_account']
-    jsonFile.close()
+    with open(jsonFileName, 'r') as jsonFile:
+        namePool = json.load(jsonFile)
+        githubUser = namePool[user]['github_account']
+
     return githubUser
 
 
@@ -122,6 +121,7 @@ def generateRandomLogsfromEmployees(startTime, endTime, orgname):
         "org":orgname,
         "user":user
     }
+
 def generate_testLog(orgName, startTime, endTime, logAmount):
     '''
     Generate a logFile on the simTests under the orgName folder and the specified starttime and endtime with (logAmount) numbers of logs
@@ -138,14 +138,16 @@ def generate_testLog(orgName, startTime, endTime, logAmount):
 def grabEmployeeSample(jsonFileName, employeeAmount):
     names=[]
     employeeCount = 0
-    jsonFile = open(jsonFileName, 'r')
-    namePool = json.load(jsonFile)
-    while employeeCount <= employeeAmount:
-        candidate = random.choice(list(namePool.keys()))
-        if candidate not in names:
-            names.append(candidate)
-            employeeCount += 1
-    jsonFile.close()
+    with open(jsonFileName, 'r') as jsonFile:
+        namePool = json.load(jsonFile)
+        while True:
+            if employeeCount > employeeAmount:
+                break
+            candidate = random.choice(list(namePool.keys()))
+            if candidate not in names:
+                names.append(candidate)
+                employeeCount += 1
+
     return names
 
 if __name__ == '__main__':
