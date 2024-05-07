@@ -1,8 +1,10 @@
+from csv import DictReader
+
 from django.shortcuts import render, get_object_or_404, redirect
+
 from procData.models import breachStructure, dbQueriedUsers
 from procData.forms import uploadCSV
-from csv import DictReader
-from Scripts.githubLogParser import employee_to_github_test
+from procData.Scripts.githubLogParser import employee_to_github_test
 
 LDAP_SIMULATED = './Scripts/simulatedResults/employeeUniverse.json'
 
