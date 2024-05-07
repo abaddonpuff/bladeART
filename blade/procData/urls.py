@@ -6,4 +6,5 @@ urlpatterns = [
     path('<str:email>', views.breachStructure_detail, name="breachStructure_detail"),
     path('uploadCSV/', views.upload_csv, name='upload_csv'),
     path('success_url/', views.success_url, name='success_url'),
+    path('list_users/', views.show_allusers, name="show_allusers"),
 ]

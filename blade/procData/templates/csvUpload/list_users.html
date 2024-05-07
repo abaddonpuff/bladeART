@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Users Queried{% endblock %}
+
+{% block content %}
+  <h1>Users Queried</h1>
+  {% for db_github_user in dbQueriedUsers %}
+    <div class="dbQueriedUsers">
+        {{ db_github_user.user}}
+      <br>
+      {{ db_github_user.added }}
+      {{ db_github_user.github_account }}
+      ...
+      </div>
+  {% endfor %}
+{% endblock %}

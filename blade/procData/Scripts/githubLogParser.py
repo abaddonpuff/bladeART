@@ -4,6 +4,7 @@ import json
 from collections import defaultdict
 from pprint import pprint
 import requests
+from csv import reader
 '''
 Order:
  Input: List of repos, list of ldap names, name of the organization.
@@ -13,8 +14,39 @@ Order:
  getUserListfromCSV (Process the dict information into a CSV)
  getOrgMembership (Process the list and determine repo membership)
  analyzeLog(Obtain the logs from the interesting subjects and stores into another csv)
- 
+
 '''
+def employee_to_github_test(employee_name, ldapResource):
+    '''
+    Obtains github account name from an employee.
+
+    Input: List of employees
+    Output: Dictionary with the github account
+    '''
+    with open(ldapResource, 'r') as ldap_environment:
+        print(f'Trying user {employee_name}')
+        try:
+            #Change to resolve through Actual LDAP Later
+            ldapsearch = json.load(ldap_environment)
+            gitLogin = ldapsearch[employee_name]
+            return gitLogin['github_account'].lower()
+        except Exception as err:
+            print(f"Unexpected {err=}, {type(err)=}")
+
+
+
+def get_Github_dict_from_csv(employee_file_path, ldap_file_path):
+    employeesInfo = {}
+
+    with open(employee_file_path, 'r') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader, None)
+        for employee in reader:
+            name = employee[0]
+            employeesInfo[name.lower()] = employee_to_github_test(name, ldap_file_path)
+
+    return employeesInfo
+
 
 def employee2github(employeeFile, ghUsername, ghToken, ldapResource):
     '''
@@ -26,20 +58,36 @@ def employee2github(employeeFile, ghUsername, ghToken, ldapResource):
     employeesInfo = {}
 
     while True:
-        employee = employeeFile.readline()
-        if employee != '':
-            print(f'Trying user {employee}')
-            ldapsearch = f'{ldapResource}'
-            res = requests.get(ldapsearch, auth=(ghUsername, ghToken))
-            gitLogin = json.loads(res.text)
-            if 'github_account' in gitLogin.keys():
-                print(f'Found Github Account: {gitLogin["github_account"]}')
-                github = gitLogin['github_account']
-            else:
-                github = '<NONE>'
-            employeesInfo[employee] = github
-        else:
-            break
+        #Commenting to work on the test environment
+        #employee = employeeFile.readline().strip()
+
+        with open('./simTests/userTest.csv','r') as csvfile:
+            reader = csv.reader(csvfile)
+            next(reader, None)
+            for row in reader:
+                employee = row[0]
+                if employee != '':
+                    print(f'Trying user {employee}')
+
+                    #Commenting to work on the test environment
+                    #ldapsearch = f'{ldapResource}'
+                    #res = requests.get(ldapsearch, auth=(ghUsername, ghToken))
+                    #gitLogin = json.loads(res.text)
+
+                    #Test
+                    ldapsearch = json.load(ldapResource)
+                    gitLogin = json.loads(ldapsearch[employee])
+                    print(gitLogin)
+                    #EndofTest
+
+                    if 'github_account' in gitLogin.keys():
+                        print(f'Found Github Account: {gitLogin["github_account"]}')
+                        github = gitLogin['github_account']
+                    else:
+                        github = '<NONE>'
+                    employeesInfo[employee] = github
+                else:
+                    break
     return employeesInfo
 
 def transformDict2CSV(outputFile, employeesInfo):
@@ -158,3 +206,11 @@ def downloadReposfromList(repos, target, ghUsername, ghToken):
             if chunk:
                 file.write(chunk)
         file.close()
+
+def main():
+    myCSV = './simTests/userTest.csv'
+    myLDAP = './simulatedResults/employeeUniverse.json'
+    print(get_Github_dict_from_csv(myCSV, myLDAP))
+
+if __name__ == '__main__':
+    main()
