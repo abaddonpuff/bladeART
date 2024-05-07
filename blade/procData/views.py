@@ -1,4 +1,5 @@
 from csv import DictReader
+from pathlib import Path
 
 from django.shortcuts import render, get_object_or_404, redirect
 
@@ -6,7 +7,7 @@ from procData.models import breachStructure, dbQueriedUsers
 from procData.forms import uploadCSV
 from procData.Scripts.githubLogParser import employee_to_github_test
 
-LDAP_SIMULATED = './Scripts/simulatedResults/employeeUniverse.json'
+LDAP_SIMULATED = Path("procData") / "Scripts" / "simulatedResults" / 'employeeUniverse.json'
 
 # Create your views here.
 def breachStructure_list(request):
@@ -34,6 +35,8 @@ def upload_csv(request):
             reader = DictReader(csv_file.read().decode("utf-8").splitlines())
             for row in reader:
                 github_associated = employee_to_github_test(row['Names'],LDAP_SIMULATED)
+                # TODO: github field no longer unique in db, check here if
+                # exists
                 user, created = dbQueriedUsers.objects.get_or_create(user=row['Names'].lower(),github_account=github_associated)
                 if not created:
                     print(f"Skip, user {user} already exists")

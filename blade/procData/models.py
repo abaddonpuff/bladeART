@@ -20,7 +20,7 @@ class breachStructure(models.Model):
 class dbQueriedUsers(models.Model):
 	user = models.CharField(max_length=100,unique=True)
 	added = models.DateTimeField(auto_now_add=True)
-	github_account = models.CharField(max_length=100,unique=True)
+	github_account = models.CharField(max_length=100)
 
 	class Meta:
 		ordering = ['-id']

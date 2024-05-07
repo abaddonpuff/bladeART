@@ -14,7 +14,7 @@ Order:
  getUserListfromCSV (Process the dict information into a CSV)
  getOrgMembership (Process the list and determine repo membership)
  analyzeLog(Obtain the logs from the interesting subjects and stores into another csv)
- 
+
 '''
 def employee_to_github_test(employee_name, ldapResource):
     '''
@@ -32,7 +32,7 @@ def employee_to_github_test(employee_name, ldapResource):
             return gitLogin['github_account'].lower()
         except Exception as err:
             print(f"Unexpected {err=}, {type(err)=}")
-    
+
 
 
 def get_Github_dict_from_csv(employee_file_path, ldap_file_path):
@@ -65,6 +65,7 @@ def employee2github(employeeFile, ghUsername, ghToken, ldapResource):
             reader = csv.reader(csvfile)
             next(reader, None)
             for row in reader:
+                employee = row[0]
                 if employee != '':
                     print(f'Trying user {employee}')
 
